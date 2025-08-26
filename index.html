@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería con Pestañas</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    margin: 0; padding: 0;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 20px;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  }
+
+  /* Pestañas */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 12px 25px;
+    cursor: pointer;
+    background: #ddd;
+    border-radius: 10px 10px 0 0;
+    margin: 0 5px;
+    transition: 0.3s;
+  }
+
+  .tab.active {
+    background: #4a90e2;
+    color: white;
+    font-weight: bold;
+  }
+
+  .tab-content {
+    display: none;
+    padding: 20px;
+    background: white;
+    border-radius: 0 0 15px 15px;
+    margin: 0 20px 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .tab-content.active { display: block; }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  /* Fotos y videos responsivos */
+  .galeria img, .galeria video {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+
+  .galeria img:hover, .galeria video:hover {
+    transform: scale(1.05);
+  }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    overflow: auto; /* evita que se salga de pantalla */
+  }
+
+  .lightbox-content {
+    max-width: 30%;
+    max-height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lightbox img, .lightbox video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 15px;
+  }
+
+  .close, .prev, .next {
+    position: absolute;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    padding: 10px;
+  }
+
+  .close { top: 20px; right: 30px; }
+  .prev { top: 50%; left: 30px; transform: translateY(-50%); }
+  .next { top: 50%; right: 30px; transform: translateY(-50%); }
+</style>
+</head>
+<body>
+
+<h1>Mi Galería</h1>
+
+<!-- Pestañas -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('fotos')">📷 Fotos</div>
+  <div class="tab" onclick="showTab('videos')">🎥 Videos</div>
+</div>
+
+<!-- Fotos -->
+<div id="fotos" class="tab-content active">
+  <div class="galeria" id="galeria-fotos">
+    <!-- 21 Fotos -->
+    <img src="foto1.jpg" alt="Foto 1">
+    <img src="foto2.jpg" alt="Foto 2">
+    <img src="foto3.jpg" alt="Foto 3">
+    <img src="foto4.jpg" alt="Foto 4">
+    <img src="foto5.jpg" alt="Foto 5">
+    <img src="foto6.jpg" alt="Foto 6">
+    <img src="foto7.jpg" alt="Foto 7">
+    <img src="foto8.png" alt="Foto 8">
+    <img src="foto9.png" alt="Foto 9">
+    <img src="foto10.jpg" alt="Foto 10">
+    <img src="foto11.jpg" alt="Foto 11">
+    <img src="foto12.jpg" alt="Foto 12">
+    <img src="foto13.jpg" alt="Foto 13">
+    <img src="foto14.png" alt="Foto 14">
+    <img src="foto15.png" alt="Foto 15">
+    <img src="foto16.png" alt="Foto 16">
+    <img src="foto17.jpg" alt="Foto 17">
+    <img src="foto18.jpg" alt="Foto 18">
+    <img src="foto19.jpg" alt="Foto 19">
+    <img src="foto20.jpg" alt="Foto 20">
+    <img src="foto21.jpg" alt="Foto 21">
+  </div>
+</div>
+<!-- Videos -->
+<div id="videos" class="tab-content">
+  <div class="galeria" id="galeria-videos">
+    <!-- 5 Videos -->
+    <video>
+      <source src="video1.mp4" type="video/mp4">
+    </video>
+    <video>
+      <source src="video2.mp4" type="video/mp4">
+    </video>
+    <video>
+      <source src="video3.mp4" type="video/mp4">
+    </video>
+    <video>
+      <source src="video4.mp4" type="video/mp4">
+    </video>
+    <video>
+      <source src="video5.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <span class="close" onclick="closeLightbox()">&times;</span>
+  <span class="prev" onclick="changeItem(-1)">&#10094;</span>
+  <span class="next" onclick="changeItem(1)">&#10095;</span>
+  <div class="lightbox-content" id="lightbox-content"></div>
+</div>
+
+<script>
+let currentIndex = 0;
+let items = [];
+
+// Mostrar pestaña
+function showTab(tabId) {
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+  document.querySelector('.tab[onclick="showTab(\'' + tabId + '\')"]').classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// Abrir lightbox
+function openLightbox(index, type) {
+  currentIndex = index;
+  items = Array.from(document.querySelectorAll(`#${type} .galeria img, #${type} .galeria video`));
+  showItem();
+  document.getElementById("lightbox").style.display = "flex";
+}
+
+// Cerrar lightbox
+function closeLightbox() {
+  document.getElementById("lightbox").style.display = "none";
+  document.getElementById("lightbox-content").innerHTML = "";
+}
+
+// Cambiar item en lightbox
+function changeItem(step) {
+  currentIndex = (currentIndex + step + items.length) % items.length;
+  showItem();
+}
+
+// Mostrar item actual
+function showItem() {
+  const content = document.getElementById("lightbox-content");
+  const item = items[currentIndex];
+
+  if(item.tagName.toLowerCase() === "img") {
+    content.innerHTML = `<img src="${item.src}" alt="">`;
+  } else if(item.tagName.toLowerCase() === "video") {
+    content.innerHTML = `<video controls autoplay><source src="${item.querySelector('source').src}" type="video/mp4"></video>`;
+  }
+}
+
+// Activar lightbox al hacer clic
+document.querySelectorAll("#galeria-fotos img").forEach((img,i)=>{
+  img.addEventListener("click", ()=>openLightbox(i,"fotos"));
+});
+document.querySelectorAll("#galeria-videos video").forEach((vid,i)=>{
+  vid.addEventListener("click", ()=>openLightbox(i,"videos"));
+});
+</script>
+
+</body>
+</html>
